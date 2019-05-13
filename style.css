@@ -14,3 +14,8 @@ html, body {
     left: 0;
     color: gray;
 }
+#reset {
+    position: fixed;
+    top: 0;
+    right: 0;
+}

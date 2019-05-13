@@ -21,6 +21,10 @@ function createFood(){
 }
 let generateFirst = 50;
 let traits = ["size","speed"];
+function reset(){
+    localStorage.removeItem("s");
+    window.location.href = window.location.href;
+}
 function createCreature(x,y,parent){
     let mutation = 10;
     let c = {
@@ -109,8 +113,11 @@ onload = function(){
             c[border.pos] = border.val;
         }
         resiz();
-        genFood();
-        runGeneration();
+        setTimeout(function(){
+            genFood();
+            runGeneration();
+        },500);
+        
     }
     
 }
