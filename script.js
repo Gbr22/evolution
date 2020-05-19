@@ -54,7 +54,7 @@ function createCreature(x,y,parent){
             let rnd = Math.random() * mutation;
             let mut_multiplier = isPlus ? 1+rnd : 1-rnd;
             let val = mut_multiplier * parentval;
-            console.log(p,mut_multiplier,val);
+            
             c.traits[p] = val;
             
             /* console.log(mut_multiplier); */
@@ -139,6 +139,7 @@ onload = function(){
         resiz();
         genFood();
         runGeneration();
+        runXTicks(500);
     }
     
 }
@@ -173,52 +174,60 @@ function tryReproduce(i){
     }
 }
 let ticks = 0;
+
+function runTick(){
+    for (let i=0; i < creatures.length; i++){
+        let e = creatures[i];
+        e.alivefor++;
+        let reproductiveFood = getReproductiveFood(e);
+        if (e.food < 150){
+            e.x += Math.sin((180/Math.PI)*e.facing) * e.traits.speed;
+            e.y -= Math.cos((180/Math.PI)*e.facing) * e.traits.speed;
+            e.food -= e.traits.speed/10;
+            e.food -= e.traits.size/100;
+            if (e.food < -reproductiveFood){
+                creatures.splice(i,1);
+            }
+        }
+        
+        for (let j=0; j < food.length; j++){
+            let f = food[j];
+            if (f.x > e.x-e.traits.size/2 && f.x < e.x+e.traits.size/2 &&
+                f.y > e.y-e.traits.size/2 && f.y < e.y+e.traits.size/2){
+                    food.splice(j,1);
+                    j--;
+                    e.food += 100;
+            }
+        }
+        if (outOfBounds(e)){
+            e.facing += Math.floor(Math.random()*360);
+            if (e.facing > 360){
+                e.facing -= 360;
+            }
+        }
+        if (e.alivefor % Math.floor(e.traits.offspringTime) == 0){
+            tryReproduce(i);
+        }
+    }
+    if (ticks % 1 == 0){
+        for (i of new Array(5)){
+            createFood();
+        }
+    }
+    ticks++;
+
+}
+function runXTicks(num){
+    for (let i=0; i < num; i++){
+        runTick();
+    }
+}
 let simulate = function(){
     
     if (running){
-        
-        for (let i=0; i < creatures.length; i++){
-            let e = creatures[i];
-            e.alivefor++;
-            let reproductiveFood = getReproductiveFood(e);
-            if (e.food < 150){
-                e.x += Math.sin((180/Math.PI)*e.facing) * e.traits.speed;
-                e.y -= Math.cos((180/Math.PI)*e.facing) * e.traits.speed;
-                e.food -= e.traits.speed/10;
-                e.food -= e.traits.size/100;
-                if (e.food < -reproductiveFood){
-                    creatures.splice(i,1);
-                }
-            }
-            
-            for (let j=0; j < food.length; j++){
-                let f = food[j];
-                if (f.x > e.x-e.traits.size/2 && f.x < e.x+e.traits.size/2 &&
-                    f.y > e.y-e.traits.size/2 && f.y < e.y+e.traits.size/2){
-                        food.splice(j,1);
-                        j--;
-                        e.food += 100;
-                }
-            }
-            if (outOfBounds(e)){
-                e.facing += Math.floor(Math.random()*360);
-                if (e.facing > 360){
-                    e.facing -= 360;
-                }
-            }
-            if (e.alivefor % Math.floor(e.traits.offspringTime) == 0){
-                tryReproduce(i);
-            }
-        }
-        if (ticks % 1 == 0){
-            for (i of new Array(5)){
-                createFood();
-            }
-        }
-        ticks++;
-        
-        
+        runTick();
     }
+    
     setTimeout(simulate,simulate_speed);
 }
 simulate();
@@ -268,7 +277,7 @@ let draw = function(){
     for (let i=0; i < traits.length; i++){
         data["avg_trait_"+traits[i]] = 0;
     }
-    data.generation = s.generation;
+    data.ticks = ticks;
 
     
     for (let i=0; i < lc.length; i++){
