@@ -20,31 +20,44 @@ function createFood(){
     food.push(f);
 }
 let generateFirst = 50;
-let traits = ["size","speed"];
+let traits = ["size","speed","hue"];
 function reset(){
     localStorage.removeItem("s");
     window.location.href = window.location.href;
 }
 function createCreature(x,y,parent){
-    let mutation = 10;
+    let mutation = 0.10; //percent 
     let c = {
         x:x,
         y:y,
         traits:{
             speed:Math.floor(Math.random()*10),
-            size:Math.floor(Math.random()*50)+10
+            size:Math.floor(Math.random()*50)+10,
+            hue:100
         },
         food:0,
         facing:Math.floor(Math.random()*360)
     };
 
+    
     if (parent != undefined){
         c.place = parent.place;
+        
+        
         for (p in parent.traits){
-            let t = parent.traits[p];
-            let t_mutation = t/100*mutation;
-            let mut = Math.floor(Math.random()*t_mutation*2-t_mutation);
-            c.traits[p] = parent.traits[p]+mut;
+            
+            
+            let parentval = parent.traits[p];
+            let isPlus = Math.random() > 0.5;
+            let rnd = Math.random() * mutation;
+            let mut_multiplier = isPlus ? 1+rnd : 1-rnd;
+            let val = mut_multiplier * parentval;
+            console.log(p,mut_multiplier,val);
+            c.traits[p] = val;
+            
+            /* console.log(mut_multiplier); */
+            /* console.log(p, divideSmallerFromBigger(parentval,val)); */
+            
         }
         
     }
@@ -208,6 +221,12 @@ let simulate = function(){
     setTimeout(simulate,simulate_speed);
 }
 simulate();
+function numToBounds(num,min,max){
+    while(num > max){
+        num = num - max + min;
+    }
+    return num;
+}
 let draw = function(){
     
     ctx.fillStyle="black";
@@ -216,8 +235,10 @@ let draw = function(){
     
     for (let i=0; i < creatures.length; i++){
         let e = creatures[i];
-        let hue = e.place/generateFirst;
+        let hue = e.traits.hue/100;
         hue = 360*hue;
+        /* hue = numToBounds(360*hue, 0, 360); */
+        /* console.table({t:e.traits.hue,hue}); */
 
         ctx.fillStyle = `hsl(${hue},50%,50%)`;
         
