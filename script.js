@@ -24,6 +24,9 @@ let traits = ["size","speed","hue","offspringTime"];
 function reset(){
     restart();
 }
+function snap(){
+    creatures.splice(0,creatures.length/2);
+}
 function createCreature(x,y,parent){
     let mutation = 0.10; //percent 
     let c = {
