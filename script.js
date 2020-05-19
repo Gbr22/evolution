@@ -137,11 +137,8 @@ onload = function(){
             c[border.pos] = border.val;
         }
         resiz();
-        setTimeout(function(){
-            genFood();
-            runGeneration();
-        },500);
-        
+        genFood();
+        runGeneration();
     }
     
 }
@@ -149,9 +146,8 @@ let running = false;
 let started;
 s.generation = 0;
 let runGeneration = function(){
-    started = Date.now();
     running = true;
-    s.generation++;
+    started = Date.now();
 }
 let outOfBounds = function(c){
     return (c.x < 0 || c.x > canvas.width ||
@@ -159,9 +155,9 @@ let outOfBounds = function(c){
 }
 let data = {}
 
-let simulate_speed = 2;
+let simulate_speed = 5;
 function getReproductiveFood(c){
-    return c.traits.size/40 * 50;
+    return c.traits.size/40 * 80;
 }
 function tryReproduce(i){
     let reproductiveFood = getReproductiveFood(creatures[i]);
@@ -176,6 +172,7 @@ function tryReproduce(i){
         
     }
 }
+let ticks = 0;
 let simulate = function(){
     
     if (running){
@@ -213,11 +210,13 @@ let simulate = function(){
                 tryReproduce(i);
             }
         }
+        if (ticks % 1 == 0){
+            for (i of new Array(5)){
+                createFood();
+            }
+        }
+        ticks++;
         
-    } else {
-        
-        genFood();
-        runGeneration();
         
     }
     setTimeout(simulate,simulate_speed);
@@ -265,6 +264,7 @@ let draw = function(){
     data.creatures = lc.length;
     data.foodEntities = food.length;
     data.avgFood = 0;
+    data.avgAge = 0;
     for (let i=0; i < traits.length; i++){
         data["avg_trait_"+traits[i]] = 0;
     }
@@ -274,12 +274,14 @@ let draw = function(){
     for (let i=0; i < lc.length; i++){
         
         data.avgFood+=lc[i].food;
+        data.avgAge+=lc[i].alivefor;
         for (let j=0; j < traits.length; j++){
             data["avg_trait_"+traits[j]] += lc[i].traits[traits[j]];
         }
         
     }
     data.avgFood = data.avgFood/lc.length;
+    data.avgAge = data.avgAge/lc.length;
     for (let i=0; i < traits.length; i++){
         data["avg_trait_"+traits[i]] /= lc.length;
     }
