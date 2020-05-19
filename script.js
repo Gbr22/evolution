@@ -20,7 +20,7 @@ function createFood(){
     food.push(f);
 }
 let generateFirst = 50;
-let traits = ["size","speed","hue"];
+let traits = ["size","speed","hue","offspringTime"];
 function reset(){
     localStorage.removeItem("s");
     window.location.href = window.location.href;
@@ -33,8 +33,10 @@ function createCreature(x,y,parent){
         traits:{
             speed:Math.floor(Math.random()*10),
             size:Math.floor(Math.random()*50)+10,
-            hue:100
+            hue:100,
+            offspringTime:Math.floor(Math.random()*10)+10
         },
+        alivefor:0,
         food:0,
         facing:Math.floor(Math.random()*360)
     };
@@ -161,12 +163,26 @@ let simulate_speed = 2;
 function getReproductiveFood(c){
     return c.traits.size/40 * 50;
 }
+function tryReproduce(i){
+    let reproductiveFood = getReproductiveFood(creatures[i]);
+    if (creatures[i].food < reproductiveFood){
+        creatures.splice(i,1);
+    } else {
+        if (creatures[i].food >= reproductiveFood){
+            createCreature(creatures[i].x,creatures[i].y,creatures[i]);
+            
+            creatures[i].food -= reproductiveFood;
+        }
+        
+    }
+}
 let simulate = function(){
     
     if (running){
         
         for (let i=0; i < creatures.length; i++){
             let e = creatures[i];
+            e.alivefor++;
             let reproductiveFood = getReproductiveFood(e);
             if (e.food < 150){
                 e.x += Math.sin((180/Math.PI)*e.facing) * e.traits.speed;
@@ -193,25 +209,11 @@ let simulate = function(){
                     e.facing -= 360;
                 }
             }
-
-        }
-        
-        if (Date.now() - started > 10000/simulate_speed){
-            running = false;
-            for (let i=0; i < creatures.length; i++){
-                let reproductiveFood = getReproductiveFood(creatures[i]);
-                if (creatures[i].food < reproductiveFood){
-                    creatures.splice(i,1);
-                } else {
-                    while (creatures[i].food >= reproductiveFood){
-                        createCreature(creatures[i].x,creatures[i].y,creatures[i]);
-                        
-                        creatures[i].food -= reproductiveFood;
-                    }
-                    
-                }
+            if (e.alivefor % Math.floor(e.traits.offspringTime) == 0){
+                tryReproduce(i);
             }
         }
+        
     } else {
         
         genFood();
@@ -229,6 +231,10 @@ function numToBounds(num,min,max){
 }
 let draw = function(){
     
+    
+    
+    
+
     ctx.fillStyle="black";
     ctx.fillRect(0,0,canvas.width,canvas.height);
 
@@ -255,23 +261,27 @@ let draw = function(){
 
     
 
-
-    data.creatures = creatures.length;
+    var lc = [...creatures];
+    data.creatures = lc.length;
     data.foodEntities = food.length;
     data.avgFood = 0;
     for (let i=0; i < traits.length; i++){
         data["avg_trait_"+traits[i]] = 0;
     }
     data.generation = s.generation;
-    for (let i=0; i < creatures.length; i++){
-        data.avgFood+=creatures[i].food;
-        for (let i=0; i < traits.length; i++){
-            data["avg_trait_"+traits[i]] += creatures[i].traits[traits[i]];
+
+    
+    for (let i=0; i < lc.length; i++){
+        
+        data.avgFood+=lc[i].food;
+        for (let j=0; j < traits.length; j++){
+            data["avg_trait_"+traits[j]] += lc[i].traits[traits[j]];
         }
+        
     }
-    data.avgFood = data.avgFood/creatures.length;
+    data.avgFood = data.avgFood/lc.length;
     for (let i=0; i < traits.length; i++){
-        data["avg_trait_"+traits[i]] /= creatures.length;
+        data["avg_trait_"+traits[i]] /= lc.length;
     }
     let innerHTML = "";
     for (p in data){

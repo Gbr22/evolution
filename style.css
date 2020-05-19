@@ -19,7 +19,7 @@ html, body {
 }
 #data b {
     display: inline-block;
-    width: 130px;
+    width: 200px;
 }
 #reset {
     position: fixed;
