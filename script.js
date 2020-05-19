@@ -55,6 +55,7 @@ let resiz = function(){
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 }
+resiz();
 onresize = function(){
     resiz();
 }
@@ -91,7 +92,15 @@ let getClosestBorder = function(c){
     
 }
 let genFood = function(){
-    for (let i=0; i < 100; i++){
+    let pixels = canvas.width*canvas.height;
+    let foodPerPixel = 1 / 2500;
+    let count = Math.floor(foodPerPixel * pixels);
+    console.table({
+        count,
+        pixels,
+        foodPerPixel
+    });
+    for (let i=0; i < count; i++){
         createFood();
     }
 }
