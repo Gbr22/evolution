@@ -12,7 +12,14 @@ html, body {
     position: fixed;
     top: 0;
     left: 0;
-    color: gray;
+    color: white;
+    font-family: monospace;
+    backdrop-filter: blur(10px);
+    padding: 10px;
+}
+#data b {
+    display: inline-block;
+    width: 130px;
 }
 #reset {
     position: fixed;
