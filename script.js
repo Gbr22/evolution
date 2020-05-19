@@ -158,7 +158,7 @@ let data = {}
 
 let simulate_speed = 5;
 function getReproductiveFood(c){
-    return c.traits.size/40 * 80;
+    return c.traits.size*c.traits.size/400 * 1;
 }
 function tryReproduce(i){
     let reproductiveFood = getReproductiveFood(creatures[i]);
