@@ -22,8 +22,7 @@ function createFood(){
 let generateFirst = 50;
 let traits = ["size","speed","hue","offspringTime"];
 function reset(){
-    localStorage.removeItem("s");
-    window.location.href = window.location.href;
+    restart();
 }
 function createCreature(x,y,parent){
     let mutation = 0.10; //percent 
@@ -119,6 +118,25 @@ let genFood = function(){
         createFood();
     }
 }
+function restart(){
+    localStorage.removeItem("s");
+    creatures = [];
+    food = [];
+    ticks = 0;
+    for (let i=0; i < generateFirst; i++){
+        let c = createCreature(
+            Math.floor(Math.random()*canvas.width),
+            Math.floor(Math.random()*canvas.height),
+            {place:i}
+        );
+        let border = getClosestBorder(c);
+        c[border.pos] = border.val;
+    }
+    resiz();
+    genFood();
+    runGeneration();
+    /* runXTicks(500); */
+}
 onload = function(){
     resiz();
     if (localStorage.getItem("s") != undefined){
@@ -127,19 +145,7 @@ onload = function(){
         food = s.food;
         runGeneration();
     } else {
-        for (let i=0; i < generateFirst; i++){
-            let c = createCreature(
-                Math.floor(Math.random()*canvas.width),
-                Math.floor(Math.random()*canvas.height),
-                {place:i}
-            );
-            let border = getClosestBorder(c);
-            c[border.pos] = border.val;
-        }
-        resiz();
-        genFood();
-        runGeneration();
-        runXTicks(500);
+        restart();
     }
     
 }
